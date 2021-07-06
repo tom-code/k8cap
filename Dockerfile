@@ -1,2 +1,2 @@
 FROM scratch
-ADD k8cap /
+ADD private.pem cert.pem k8cap /

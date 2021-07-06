@@ -50,6 +50,14 @@ func capturesvc(cmd *cobra.Command, args []string) {
   capture(pid)
 }
 
+func hookserver(cmd *cobra.Command, args []string) {
+  hooksvc()
+}
+func hookinstall(cmd *cobra.Command, args []string) {
+  clientset := kubeConnect()
+  hookInstall(clientset)
+}
+
 func main() {
 
   root := cobra.Command {
@@ -80,6 +88,22 @@ func main() {
     Run: capturesvc,
   }
   root.AddCommand(capturesvc)
+
+  hooksrv := &cobra.Command {
+    Use: "hookserver",
+    Short: "start hook server",
+    //Args: cobra.MinimumNArgs(2),
+    Run: hookserver,
+  }
+  root.AddCommand(hooksrv)
+
+  hookinst := &cobra.Command {
+    Use: "hookinstall",
+    Short: "install hook server",
+    //Args: cobra.MinimumNArgs(2),
+    Run: hookinstall,
+  }
+  root.AddCommand(hookinst)
 
   if err := root.Execute(); err != nil {
     log.Println(err)
