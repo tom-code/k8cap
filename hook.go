@@ -13,6 +13,23 @@ import (
   "k8s.io/client-go/kubernetes"
 )
 
+func hookDelete(cs *kubernetes.Clientset) {
+  err := cs.AdmissionregistrationV1().MutatingWebhookConfigurations().Delete(context.Background(),
+                  "hook.test.com", metav1.DeleteOptions{})
+  if err != nil {
+    log.Println(err)
+  }
+
+  err = cs.CoreV1().Services("default").Delete(context.Background(), "hook1", metav1.DeleteOptions{})
+  if err != nil {
+    log.Println(err)
+  }
+
+  err = cs.CoreV1().Pods("default").Delete(context.Background(), "hook1", metav1.DeleteOptions{})
+  if err != nil {
+    log.Println(err)
+  }
+}
 
 func hookInstall(cs *kubernetes.Clientset) {
   var err error

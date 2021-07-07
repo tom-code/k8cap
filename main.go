@@ -2,7 +2,10 @@ package main
 
 import (
   "context"
+  "crypto/tls"
+  "fmt"
   "log"
+  "net/http"
 
   "github.com/spf13/cobra"
   metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -57,7 +60,21 @@ func hookinstall(cmd *cobra.Command, args []string) {
   clientset := kubeConnect()
   hookInstall(clientset)
 }
-
+func hookdele(cmd *cobra.Command, args []string) {
+  clientset := kubeConnect()
+  hookDelete(clientset)
+}
+func initcfunc(cmd *cobra.Command, args []string) {
+  http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+  url := fmt.Sprintf("https://hook1.default.svc/start?namespace=%s&pod=%s",
+                      args[0], args[1])
+  resp, err := http.Get(url)
+  if err != nil {
+    log.Println(err)
+  } else {
+    log.Println(resp.Status)
+  }
+}
 func main() {
 
   root := cobra.Command {
@@ -104,6 +121,23 @@ func main() {
     Run: hookinstall,
   }
   root.AddCommand(hookinst)
+
+  hookdel := &cobra.Command {
+    Use: "hookdel",
+    Short: "delete hook server",
+    //Args: cobra.MinimumNArgs(2),
+    Run: hookdele,
+  }
+  root.AddCommand(hookdel)
+
+  initc := &cobra.Command {
+    Use: "init",
+    Short: "init container service",
+    Args: cobra.MinimumNArgs(2),
+    Run: initcfunc,
+  }
+  root.AddCommand(initc)
+
 
   if err := root.Execute(); err != nil {
     log.Println(err)
