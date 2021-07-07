@@ -19,6 +19,37 @@ type HookHandler struct {
 }
 func (h *HookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
   log.Printf("new request %s\n", r.RequestURI)
+  if r.URL.Path == "/download" {
+    name := r.URL.Query().Get("pod")
+    namespace := r.URL.Query().Get("namespace")
+    if (len(name) == 0) || (len(namespace) == 0) {
+      w.WriteHeader(400)
+      return
+    }
+    name = "capture-"+name
+    cs := kubeConnect()
+    capturepod, err := cs.CoreV1().Pods("default").Get(context.Background(), name, metav1.GetOptions{})
+    if err != nil {
+      log.Println(err)
+      w.WriteHeader(404)
+      return
+    }
+    ip := capturepod.Status.PodIP
+    if len(ip) == 0 {
+      w.WriteHeader(500)
+      return
+    }
+    url := "http://"+ip+"/"
+    resp, err := http.Get(url)
+    if err != nil {
+      log.Println(err)
+      w.WriteHeader(500)
+      return
+    }
+    data, err := ioutil.ReadAll(resp.Body)
+    resp.Body.Close()
+    w.Write(data)
+  }
   if r.URL.Path == "/start" {
     name := r.URL.Query().Get("pod")
     namespace := r.URL.Query().Get("namespace")

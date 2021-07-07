@@ -57,8 +57,8 @@ func captureWorker() error {
       continue
     }
     pcap.write(buffer)
-    hex := hex.EncodeToString(buffer[:n])
-    log.Println(hex)
+    //hex := hex.EncodeToString(buffer[:n])
+    //log.Println(hex)
     decoder.decode(buffer[:n])
   }
 }

@@ -85,6 +85,7 @@ func hookInstall(cs *kubernetes.Clientset) {
       Selector: map[string]string{
         "app": "hook1",
       },
+      Type: corev1.ServiceTypeNodePort,
       Ports: []corev1.ServicePort {
         {
           Protocol: corev1.ProtocolTCP,
